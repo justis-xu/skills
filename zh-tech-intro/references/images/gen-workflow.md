@@ -9,26 +9,22 @@
 
 逐张生成、逐张确认，不批量、不跳过用户。每张图经过自动质检后再给用户看，用户确认后再写入文章，再进入下一张。
 
+**⚠️ gen.sh 必须串行执行**：gen.sh 靠"生成前后对比 codex session 文件"来找到自己的输出，并行运行时多个进程会互相抢对方的 session 文件，导致多张图生成结果相同（错图）。即使用户说"并行/全部一起"，也要逐张顺序跑，不能改。
+
 ---
 
 ## 第一步：检测并配置环境
 
-```bash
-bash scripts/gen-image.sh --check
-```
+手动确认以下两样东西：
 
-脚本自动检测四样东西，缺失时给出安装指引：
+| 工具 | 验证命令 | 缺失时 |
+|------|---------|--------|
+| `codex` CLI | `codex --version` | 安装 Codex CLI 并运行 `codex login` |
+| `picgo` | `picgo --version` | `npm install -g picgo` 或 `brew install picgo` |
 
-| 工具 | 作用 | 缺失时 |
-|------|------|--------|
-| `codex` CLI | 驱动 GPT Image 2 | 打印安装命令，需用户手动操作 |
-| `gpt-image-2` skill | 图片生成脚本 | `npx skills add https://github.com/agentspace-so/agent-skills --skill gpt-image-2` |
-| `picgo` | 上传图床获取 URL | **自动尝试安装**；失败则降级本地路径 |
-| picgo 图床配置 | 指定上传目标 | 见下方说明 |
+picgo 图床配置：运行 `picgo set uploader` 按提示填写图床信息；配置后 `picgo upload 任意图片.png` 验证，看到 `https://` 开头的 URL 说明成功。
 
-输出 `STATUS: ready` 后继续；否则按提示完成配置后重新运行 `--check`。
-
-> **picgo 图床配置**：脚本检测到本机 PicGo GUI 应用（`~/Library/Application Support/picgo/data.json`）时，自动将其当前默认图床同步到 CLI 配置，无需手动操作。没有 GUI 应用时，运行 `picgo set uploader` 按提示填写图床信息；配置后 `picgo upload 任意图片.png` 验证，看到 `https://` 开头的 URL 说明成功。
+PicGo GUI 用户：GUI 应用的配置不会自动同步到 CLI，需要单独运行 `picgo set uploader`。
 
 ---
 
@@ -47,11 +43,21 @@ bash scripts/gen-image.sh --check
 
 ### 3.1 生成图片
 
-提取该画图提示代码块文本（去掉 `# ` 前缀）：
+提取该画图提示代码块文本（去掉 `# ` 前缀），**两步执行，不能合并**：
 
 ```bash
-bash scripts/gen-image.sh --prompt "提示文本" --out /tmp/zh-tech-img-N.png --upload
+# 第一步：生成图片（生成脚本没有 --upload 参数）
+bash ~/.claude/skills/gpt-image-2/scripts/gen.sh \
+  --prompt "提示文本" \
+  --out /tmp/zh-tech-img-N.png \
+  --timeout-sec 300
+
+# 第二步：上传图床（用和文章里相同的文件名，实现 CDN 覆盖而非新增）
+picgo upload /tmp/zh-tech-img-N.png
+# 输出的 https:// URL 即为最终 CDN 地址
 ```
+
+> **上传文件名规则**：如果文章里已有同名图片 URL（重新生成时），用相同文件名上传以覆盖 CDN 文件，文章 URL 不需要改。如果是全新图片，自行命名后写入文章。
 
 ### 3.2 自动质检
 
@@ -173,6 +179,13 @@ D) 查看 3 次生成结果，我来选一张
 ---
 
 ## 第四步：写入文章
+
+**写入前必须先读当前文章内容**，检查该画图提示代码块是否被人工修改过（与本次生成时提取的版本不同）：
+
+- **代码块未改动**：正常写入，无需提示
+- **代码块已被人工改动**：展示 diff，询问用户「检测到画图提示已被手动修改，是否用当前版本覆盖，还是保留你的修改？」，等用户确认再操作
+
+同理，若文章中已有图片 URL（重新生成场景），写入前读取当前 URL，若与本次上传结果相同（CDN 覆盖，URL 不变），直接跳过 URL 写入步骤。
 
 写入时，**必须同时做两件事，缺一不可**：
 1. 把最终成功的提示词回写到文章代码块（哪怕只改了一个字也要更新）——提示词是图片的"源码"，内容变更重新生成时用的是最新版

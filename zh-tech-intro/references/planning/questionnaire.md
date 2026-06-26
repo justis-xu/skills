@@ -25,8 +25,8 @@
 
 | 优先级 | 路径 | 说明 |
 |--------|------|------|
-| 1 | `.aigogoing/zh-tech-intro/profile.md`（项目目录） | 项目级覆盖 |
-| 2 | `$HOME/.aigogoing/zh-tech-intro/profile.md` | 用户全局 |
+| 1 | `.gogoingai/zh-tech-intro/profile.md`（项目目录） | 项目级覆盖 |
+| 2 | `$HOME/.gogoingai/zh-tech-intro/profile.md` | 用户全局 |
 
 通常写在用户全局路径，只有特殊项目才用项目级覆盖。
 
@@ -317,7 +317,7 @@ AskUserQuestion({
 
 ## 写入 context.md
 
-系统专属问卷回答完后，把结果写入**文章所在目录**的 `context.md`（仅包含本篇特有内容，全局画像不重复写入）。
+系统专属问卷回答完后，把结果写入 `$HOME/.gogoingai/zh-tech-intro/{项目目录名}/context.md`（项目目录名 = `basename $(pwd)`；仅包含本篇特有内容，全局画像不重复写入）。
 
 ```markdown
 # 写作上下文
@@ -369,10 +369,11 @@ AskUserQuestion({
 ## 后续会话加载与补充提问
 
 再次打开同一篇文章时：
-1. 静默加载全局画像（无需提示）
-2. 检查文章目录的 `context.md` → 有则加载，告知用户「已加载上次对本篇的补充说明」；没有则不提
-3. 全局画像不存在 → 走完整问卷流程
+1. 静默加载全局画像（`$HOME/.gogoingai/zh-tech-intro/profile.md`，无需提示）
+2. 检查 `$HOME/.gogoingai/zh-tech-intro/{项目目录名}/context.md` → 有则加载，告知用户「已加载上次对本篇的补充说明」；没有则不提
+3. 检查 `$HOME/.gogoingai/zh-tech-intro/{项目目录名}/skeleton.md` → 有则静默加载
+4. 全局画像不存在 → 走完整问卷流程
 
 **补充提问**：规划中发现某维度信息不足，只用 `AskUserQuestion` 补问 1~2 题：
 - 属于通用背景（读者习惯、语言偏好）→ 更新全局画像
-- 属于本篇特有（这个系统的模块了解程度）→ 写入文章目录的 `context.md`
+- 属于本篇特有（这个系统的模块了解程度）→ 写入 `$HOME/.gogoingai/zh-tech-intro/{项目目录名}/context.md`

@@ -5,7 +5,8 @@
 | 文件 | 内容 |
 |------|------|
 | `SKILL.md` | 三条主流程（从0到1 / 修改 / 审查）+ 核心原则 |
-| `INDEX.md` | 本文件，全局内容导航 |
+| `references/INDEX.md` | 本文件，全局内容导航 |
+| `assets/` | 参考图片（01~06 架构图 / 流程图 + claude-memory-* 系列） |
 
 ---
 
@@ -25,7 +26,8 @@
 |------|------|
 | `style-guide.md` | 完整写作风格规范（行文、结构、语言，含 Hard Gates） |
 | `anti-patterns.md` | 禁止事项清单（35 条），含定稿自检清单 |
-| `diagram-style.md` | 画图风格规范（8 种图类型 + 12 个踩坑教训 + 禁用泳道图） |
+| `diagram-style.md` | 画图风格规范（13 种图类型模板 + 7 个踩坑 + 禁用泳道图） |
+| `gen-workflow.md` | 图片生成完整流程（环境检测 → 生成 → 质检 → 上传 → 写入文章） |
 
 ---
 
@@ -52,20 +54,12 @@
 
 ---
 
-## references/images/ — 图片生成
+## references/examples/ — 示例
 
 | 文件 | 内容 |
 |------|------|
-| `gen-workflow.md` | 图片生成完整流程（环境检测 → 生成 → 质检 → 上传 → 写入文章） |
-
----
-
-## references/examples/ — 示例文章
-
-| 文件 | 内容 |
-|------|------|
+| `diagram-examples.md` | 6 个完整画图提示示例（对应 assets/ 里的参考图） |
 | `memoryos-sample.md` | 架构深挖型文章节选（Mode B 参考） |
 | `powermem-sample.md` | 含折线图、公式卡片的画图提示示例 |
 | `mem0-sample.md` | 版本对比型文章节选（Mode C 参考） |
 | `claude-memory-sample.md` | 完整文章样例（Mode B · R2），12 处画图提示全覆盖 |
-| `assets/` | 参考图片（01~06 + claude-memory-* 系列），有识图能力时优先查看 |
